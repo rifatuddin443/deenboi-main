@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# Barakah Books
 
-TODO: Document your project here
+Inventory & sales management web app.

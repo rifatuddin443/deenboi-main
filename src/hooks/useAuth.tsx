@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
-type AppRole = "seller" | "stakeholder";
+type AppRole = "seller" | "stakeholder" | "admin";
 
 interface AuthContextType {
   user: User | null;
@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   role: null,
   loading: true,
-  signOut: async () => {},
+  signOut: async () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -33,8 +33,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .from("user_roles")
       .select("role")
       .eq("user_id", userId)
-      .maybeSingle();
-    setRole((data?.role as AppRole) || null);
+      .returns<{ role: AppRole }[]>();
+
+    const roles = (data ?? []).map((r) => r.role);
+    if (roles.includes("admin")) {
+      setRole("admin");
+      return;
+    }
+    if (roles.includes("stakeholder")) {
+      setRole("stakeholder");
+      return;
+    }
+    if (roles.includes("seller")) {
+      setRole("seller");
+      return;
+    }
+    setRole(null);
   };
 
   useEffect(() => {
